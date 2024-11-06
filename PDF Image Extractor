@@ -1,0 +1,45 @@
+'''This Python script extracts images from a PDF file and saves them to a specified directory on your desktop. Using the PyMuPDF library (fitz), the script accesses each page of the PDF, identifies embedded images, and saves each one as a .png file. The Pillow library (PIL) is used to handle image processing and saving.
+
+Key Features:
+Automated Image Extraction: Extracts all images from each page of the PDF.
+Custom Save Path: Saves images to a designated Extracted_Images folder on the desktop, created if it doesn't already exist.
+Naming Convention: Images are saved with page and index identifiers for easy organization.
+Prerequisites:
+PyMuPDF: pip install pymupdf
+Pillow: pip install pillow
+Usage:
+Replace ## in pdf_path with the name of your PDF file located on your desktop.
+Run the script, and images will be saved to Extracted_Images on your desktop.
+'''
+
+from PIL import Image
+import fitz
+import io
+import os
+
+# Path to the uploaded PDF file rename the hashtags to the pdf name in the desktop
+pdf_path = "C:\\Users\\USER\\Desktop\\##.pdf"
+
+# Define the directory where images will be saved (Desktop path)
+desktop_path = "C:\\Users\\USER\\Desktop\\Extracted_Images"
+
+os.makedirs(desktop_path, exist_ok=True)
+pdf = fitz.open(pdf_path)
+
+images = []
+for page_num in range(len(pdf)):
+    page = pdf[page_num]
+    image_list = page.get_images(full=True)
+
+    for img_index, img in enumerate(image_list):
+        xref = img[0]
+        base_image = pdf.extract_image(xref)
+        image_bytes = base_image["image"]
+        image = Image.open(io.BytesIO(image_bytes))
+
+        images.append(image)
+        image.save(os.path.join(desktop_path, f"extracted_image_page{page_num + 1}_img{img_index + 1}.png"))
+
+pdf.close()
+
+print("Number of images extracted and saved to desktop:", len(images))
